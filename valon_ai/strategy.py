@@ -1,48 +1,55 @@
-"""Core trading strategy assembly."""
+from valon_ai.smc import StructureAnalyzer
+from valon_ai.order_block import OrderBlockDetector
+from valon_ai.break_of_structure import BOSDetector
+from valon_ai.fair_value_gap import FVGDetector
 
-from .smc import SMCAnalyzer
-from .order_block import OrderBlockDetector
-from .fair_value_gap import FVGDetector
-from .break_of_structure import BOSDetector
-from .risk_management import RiskManager
-from .trailing_stop import TrailingStop
-from .mt5_integration import MT5Client
+class StrategyEngine:
+    def __init__(self, candles):
+        self.candles = candles
+        self.smc = StructureAnalyzer(candles)
+        self.ob = OrderBlockDetector(candles)
+        self.bos = BOSDetector(candles)
+        self.fvg = FVGDetector(candles)
 
+    def generate_signals(self):
+        signals = []
 
-class TradingStrategy:
-    """Compose different analysis modules into a strategy."""
+        bos_events = self.bos.detect_bos()
+        bullish_obs = self.ob.detect_bullish_ob()
+        bearish_obs = self.ob.detect_bearish_ob()
+        fvgs = self.fvg.detect_fvgs()
 
-    def __init__(self):
-        self.smc = SMCAnalyzer()
-        # OrderBlockDetector expects candle data upon initialization. We pass an
-        # empty list and update the candles when analyzing the market.
-        self.ob = OrderBlockDetector([])
-        self.fvg = FVGDetector()
-        self.bos = BOSDetector([])
-        self.risk = RiskManager()
-        self.trailing = TrailingStop(distance=10)
-        # Connection is optional during initialization
-        self.mt5 = None
+        for bos in bos_events:
+            bos_index = bos["index"]
+            bos_type = bos["type"]
 
-    def connect(self):
-        """Initialize MT5 client."""
-        self.mt5 = MT5Client()
-        self.mt5.connect()
+            matching_ob = None
+            matching_fvg = None
 
-    def shutdown(self):
-        """Shutdown MT5 client."""
-        if self.mt5:
-            self.mt5.shutdown()
+            if bos_type == "bullish":
+                matching_ob = [
+                    ob for ob in bullish_obs if ob["index"] == bos_index - 1
+                ]
+                matching_fvg = [
+                    fvg
+                    for fvg in fvgs
+                    if fvg["type"] == "bullish" and fvg["index"] == bos_index
+                ]
+            elif bos_type == "bearish":
+                matching_ob = [
+                    ob for ob in bearish_obs if ob["index"] == bos_index - 1
+                ]
+                matching_fvg = [
+                    fvg
+                    for fvg in fvgs
+                    if fvg["type"] == "bearish" and fvg["index"] == bos_index
+                ]
 
-    def analyze_market(self, data):
-        """Run all analyses on the market data."""
-        # Update order block detector with the latest candle data
-        self.ob.candles = data
-        self.bos.candles = data
-        return {
-            "smc": self.smc.analyze(data),
-            "bullish_order_blocks": self.ob.detect_bullish_ob(),
-            "bearish_order_blocks": self.ob.detect_bearish_ob(),
-            "fvg": self.fvg.find(data),
-            "bos": self.bos.detect_bos(),
-        }
+            if matching_ob and matching_fvg:
+                signals.append({
+                    "type": bos_type.upper(),
+                    "index": bos_index,
+                    "price": bos["price"]
+                })
+
+        return signals
