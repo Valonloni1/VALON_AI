@@ -9,15 +9,48 @@ from valon_ai.smc import SMCAnalyzer
 
 
 SAMPLE_CANDLES = [
-    {"open": 1.05, "high": 1.10, "low": 0.94, "close": 0.95},
-    {"open": 0.95, "high": 1.15, "low": 0.92, "close": 1.12},
-    {"open": 1.12, "high": 1.13, "low": 0.87, "close": 0.90},
-    {"open": 0.90, "high": 0.93, "low": 0.85, "close": 0.92},
-    {"open": 0.92, "high": 1.05, "low": 0.91, "close": 1.02},
-    {"open": 1.02, "high": 1.20, "low": 1.01, "close": 1.15},
-    {"open": 1.15, "high": 1.25, "low": 1.10, "close": 1.20},
-    {"open": 1.20, "high": 1.30, "low": 1.18, "close": 0.92},
-    {"open": 0.92, "high": 1.00, "low": 0.90, "close": 0.95},
+    {
+        "open": 100,
+        "high": 105,
+        "low": 99,
+        "close": 104,
+        "time": "2025-01-01",
+    },
+    {
+        "open": 104,
+        "high": 106,
+        "low": 101,
+        "close": 102,
+        "time": "2025-01-02",
+    },
+    {
+        "open": 102,
+        "high": 107,
+        "low": 100,
+        "close": 106,
+        "time": "2025-01-03",
+    },
+    {
+        "open": 106,
+        "high": 110,
+        "low": 105,
+        "close": 109,
+        "time": "2025-01-04",
+    },
+    {
+        "open": 109,
+        "high": 111,
+        "low": 107,
+        "close": 108,
+        "time": "2025-01-05",
+    },
+    {
+        "open": 108,
+        "high": 112,
+        "low": 107,
+        "close": 111,
+        "time": "2025-01-06",
+    },
 ]
 
 
