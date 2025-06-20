@@ -6,7 +6,13 @@ from typing import List, Sequence, Dict, Any
 class FVGDetector:
     """Detect fair value gaps in a sequence of OHLC candles."""
 
-    def find(self, candles: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def __init__(self, candles: Sequence[Dict[str, Any]] | None = None) -> None:
+        """Store optional candle data for later processing."""
+        self.candles = list(candles) if candles is not None else []
+
+    def find(
+        self, candles: Sequence[Dict[str, Any]] | None = None
+    ) -> List[Dict[str, Any]]:
         """Return a list of detected fair value gaps.
 
         Each candle in ``candles`` must provide ``high`` and ``low`` values.
@@ -17,6 +23,9 @@ class FVGDetector:
         The returned gaps include the indices of the candles that form the
         pattern and the price range of the gap.
         """
+        if candles is None:
+            candles = self.candles
+
         gaps: List[Dict[str, Any]] = []
         for i in range(2, len(candles)):
             first = candles[i - 2]
@@ -39,6 +48,13 @@ class FVGDetector:
                     "gap_end": first['low'],
                 })
         return gaps
+
+    # Backwards compatibility
+    def detect_fvgs(
+        self, candles: Sequence[Dict[str, Any]] | None = None
+    ) -> List[Dict[str, Any]]:
+        """Alias to :meth:`find` for older interfaces."""
+        return self.find(candles)
 
 
 # Backwards compatibility
