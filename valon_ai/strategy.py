@@ -1,7 +1,7 @@
 """Core trading strategy assembly."""
 
 from .smc import SMCAnalyzer
-from .order_block import OrderBlockFinder
+from .order_block import OrderBlockDetector
 from .fair_value_gap import FairValueGapFinder
 from .break_of_structure import BreakOfStructureFinder
 from .risk_management import RiskManager
@@ -14,7 +14,9 @@ class TradingStrategy:
 
     def __init__(self):
         self.smc = SMCAnalyzer()
-        self.ob = OrderBlockFinder()
+        # OrderBlockDetector expects candle data upon initialization. We pass an
+        # empty list and update the candles when analyzing the market.
+        self.ob = OrderBlockDetector([])
         self.fvg = FairValueGapFinder()
         self.bos = BreakOfStructureFinder()
         self.risk = RiskManager()
@@ -34,9 +36,12 @@ class TradingStrategy:
 
     def analyze_market(self, data):
         """Run all analyses on the market data."""
+        # Update order block detector with the latest candle data
+        self.ob.candles = data
         return {
             "smc": self.smc.analyze(data),
-            "order_blocks": self.ob.find(data),
+            "bullish_order_blocks": self.ob.detect_bullish_ob(),
+            "bearish_order_blocks": self.ob.detect_bearish_ob(),
             "fvg": self.fvg.find(data),
             "bos": self.bos.find(data),
         }
