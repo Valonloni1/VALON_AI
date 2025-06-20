@@ -2,7 +2,7 @@
 
 from .smc import SMCAnalyzer
 from .order_block import OrderBlockDetector
-from .fair_value_gap import FairValueGapFinder
+from .fair_value_gap import FVGDetector
 from .break_of_structure import BOSDetector
 from .risk_management import RiskManager
 from .trailing_stop import TrailingStop
@@ -17,7 +17,7 @@ class TradingStrategy:
         # OrderBlockDetector expects candle data upon initialization. We pass an
         # empty list and update the candles when analyzing the market.
         self.ob = OrderBlockDetector([])
-        self.fvg = FairValueGapFinder()
+        self.fvg = FVGDetector()
         self.bos = BOSDetector([])
         self.risk = RiskManager()
         self.trailing = TrailingStop(distance=10)
