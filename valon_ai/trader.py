@@ -1,36 +1,31 @@
 from valon_ai.strategy import StrategyEngine
-from valon_ai.mt5_integration import MT5Client
 
+# 🔸 Disa të dhëna të simuluara për testim
+mock_candles = [
+    {"open": 100, "high": 110, "low": 95, "close": 108},
+    {"open": 108, "high": 112, "low": 104, "close": 110},
+    {"open": 110, "high": 115, "low": 109, "close": 111},
+    {"open": 111, "high": 114, "low": 107, "close": 108},
+    {"open": 108, "high": 109, "low": 100, "close": 102},
+    {"open": 102, "high": 105, "low": 98, "close": 99},
+    {"open": 99,  "high": 101, "low": 95, "close": 97},
+]
 
-class TradingBot:
-    """Fetch candles from MT5 and run the strategy engine."""
+# ✅ Tregti të hapura (lista bosh për simulim fillestar)
+open_trades = []
 
-    def __init__(self, symbol="XAUUSD", timeframe="M5"):
-        self.symbol = symbol
-        self.timeframe = timeframe
-        self.mt5 = MT5Client()
-        self.mt5.connect()
+# 🧠 Inicializo strategjinë
+strategy = StrategyEngine(candles=mock_candles)
 
-    def fetch_candles(self, count=100):
-        return self.mt5.get_candles(symbol=self.symbol, timeframe=self.timeframe, count=count)
+# 📊 Gjenero sinjale tregtie
+signals = strategy.generate_signals(open_trades=open_trades)
 
-    def analyze_and_trade(self):
-        candles = self.fetch_candles()
-        strategy = StrategyEngine(candles)
-        signals = strategy.generate_signals()
-
-        if signals:
-            last_signal = signals[-1]
-            direction = last_signal["type"]
-
-            if direction == "BUY":
-                print("\U0001f535 BUY signal detected → executing long entry...")
-                # self.mt5.buy(symbol=self.symbol, volume=0.1)
-            elif direction == "SELL":
-                print("\U0001f534 SELL signal detected → executing short entry...")
-                # self.mt5.sell(symbol=self.symbol, volume=0.1)
-        else:
-            print("\U0001f7e1 No valid trade signal found.")
-
-    def shutdown(self):
-        self.mt5.shutdown()
+# 📥 Printo sinjalet si të ishin tregti reale
+for signal in signals:
+    print("\n📌 Sinjal i ri tregtie:")
+    print(f"Tipi:        {signal['type']}")
+    print(f"Indeksi:     {signal['index']}")
+    print(f"Çmimi:       {signal['price']}")
+    print(f"Stop Loss:   {signal['stop_loss']}")
+    print(f"Lot Size:    {signal['lot_size']}")
+    print("🧪 [Simulim] Tregtia nuk u ekzekutua në MT5.\n")
